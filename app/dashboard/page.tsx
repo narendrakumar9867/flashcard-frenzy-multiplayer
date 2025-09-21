@@ -53,9 +53,6 @@ export default function DashboardPage() {
   }
 
   const totalGames = history.length;
-  const totalCorrect = history.reduce((sum, game) => sum + game.correctAnswers, 0);
-  const totalQuestions = totalGames * 10;
-  const averageScore = totalQuestions > 0 ? ((totalCorrect / totalQuestions) * 100).toFixed(1) : 0;
   const wins = history.filter(game => game.rank === 1).length;
 
   return (
