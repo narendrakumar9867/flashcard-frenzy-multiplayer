@@ -2,12 +2,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { GameHistory } from '@/types/game';
+import { GameHistory, Player } from '@/types/game';
 
 export default function DashboardPage() {
   const [history, setHistory] = useState<GameHistory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<Player | null>(null);
   const router = useRouter();
   const supabase = createClientComponentClient();
 
@@ -18,8 +18,15 @@ export default function DashboardPage() {
   const loadUserAndHistory = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-
+      if (user) {
+        setUser({
+          id: user.id,
+          email: user.email ?? '',
+          username: user.user_metadata?.username ?? user.email ?? ''
+        });
+      } else {
+        setUser(null);
+      }
       const response = await fetch('/api/game/history');
       if (response.ok) {
         const historyData = await response.json();
@@ -57,7 +64,7 @@ export default function DashboardPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-gray-600">Welcome back, {user?.user_metadata?.username || user?.email}!</p>
+            <p className="text-gray-600">Welcome back, {user?.username || user?.email}!</p>
           </div>
           
           <div className="flex items-center space-x-4">

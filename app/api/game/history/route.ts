@@ -1,10 +1,11 @@
+import type { MongoClient } from 'mongodb';
 import { NextResponse } from 'next/server';
 import { GameHistory } from '@/types/game';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { Collection } from 'mongodb';
 
-let clientPromise: Promise<any> | undefined;
+let clientPromise: Promise<MongoClient> | undefined;
 let useLocalDB = false;
 
 try {

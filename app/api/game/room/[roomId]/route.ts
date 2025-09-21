@@ -1,8 +1,9 @@
+import type { MongoClient } from 'mongodb';
 import { NextRequest, NextResponse } from 'next/server';
 import { GameRoom } from '@/types/game';
 import { Collection } from 'mongodb';
 
-let clientPromise: Promise<any> | undefined;
+let clientPromise: Promise<MongoClient> | undefined;
 let useLocalDB = false;
 
 try {
@@ -27,6 +28,9 @@ export async function GET(
     } else {
       try {
         const client = await clientPromise;
+        if (!client) {
+          throw new Error('MongoDB client is undefined');
+        }
         const db = client.db('flashcard-frenzy');
         const roomsCollection = db.collection('game-rooms') as Collection<GameRoom>;
         room = await roomsCollection.findOne({ roomId });
