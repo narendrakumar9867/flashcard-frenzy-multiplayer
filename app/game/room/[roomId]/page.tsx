@@ -201,9 +201,9 @@ export default function GameRoomPage({ params }: GameRoomPageProps) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-8">
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
-          <h1 className="text-2xl font-bold mb-6">✅ You're Done!</h1>
+          <h1 className="text-2xl font-bold mb-6">You are Done!</h1>
           <p className="text-gray-600 mb-6">
-            You've answered all 10 questions. Waiting for other player to finish...
+            You have answered all 10 questions. Waiting for other player to finish...
           </p>
           <div className="w-8 h-8 border-2 border-gray-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
         </div>

@@ -4,13 +4,12 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { Collection } from 'mongodb';
 
-let clientPromise: any;
+let clientPromise: Promise<any> | undefined;
 let useLocalDB = false;
 
 try {
   clientPromise = import('@/lib/mongodb').then(m => m.default);
-} catch (error) {
-  console.warn('MongoDB not available, using local storage');
+} catch {
   useLocalDB = true;
 }
 
@@ -31,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     let room: GameRoom | null = null;
 
-    if (useLocalDB) {
+    if (useLocalDB || !clientPromise) {
       room = rooms.get(roomId) || null;
     } else {
       try {
@@ -39,8 +38,7 @@ export async function POST(request: NextRequest) {
         const db = client.db('flashcard-frenzy');
         const roomsCollection = db.collection('game-rooms') as Collection<GameRoom>;
         room = await roomsCollection.findOne({ roomId });
-      } catch (mongoError) {
-        console.warn('MongoDB error, falling back to local storage:', mongoError);
+      } catch {
         useLocalDB = true;
         room = rooms.get(roomId) || null;
       }
@@ -122,7 +120,7 @@ export async function POST(request: NextRequest) {
           questions
         };
 
-        if (useLocalDB) {
+        if (useLocalDB || !clientPromise) {
           history.push(gameHistory);
         } else {
           try {
@@ -130,8 +128,7 @@ export async function POST(request: NextRequest) {
             const db = client.db('flashcard-frenzy');
             const historyCollection = db.collection('game-history') as Collection<GameHistory>;
             await historyCollection.insertOne(gameHistory);
-          } catch (mongoError) {
-            console.warn('Failed to save history to MongoDB, saving locally');
+          } catch {
             history.push(gameHistory);
           }
         }
@@ -140,7 +137,7 @@ export async function POST(request: NextRequest) {
       await Promise.all(historyPromises);
     }
 
-    if (useLocalDB) {
+    if (useLocalDB || !clientPromise) {
       rooms.set(roomId, room);
     } else {
       try {
@@ -152,8 +149,7 @@ export async function POST(request: NextRequest) {
           { roomId },
           { $set: room }
         );
-      } catch (mongoError) {
-        console.warn('MongoDB update failed, using local storage');
+      } catch {
         rooms.set(roomId, room);
       }
     }
@@ -167,8 +163,7 @@ export async function POST(request: NextRequest) {
       currentScore: room.scores[user.id] || 0
     });
 
-  } catch (error) {
-    console.error('Submit answer error:', error);
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

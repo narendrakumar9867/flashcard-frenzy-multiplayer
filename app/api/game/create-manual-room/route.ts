@@ -3,13 +3,12 @@ import { GameRoom, Player } from '@/types/game';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
-let clientPromise: any;
+let clientPromise: Promise<any> | undefined;
 let useLocalDB = false;
 
 try {
   clientPromise = import('@/lib/mongodb').then(m => m.default);
-} catch (error) {
-  console.warn('MongoDB not available, using local storage');
+} catch {
   useLocalDB = true;
 }
 
@@ -53,7 +52,7 @@ export async function POST(request: NextRequest) {
       answers: {}
     };
 
-    if (useLocalDB) {
+    if (useLocalDB || !clientPromise) {
       rooms.set(roomId, newRoom);
     } else {
       try {
@@ -61,8 +60,7 @@ export async function POST(request: NextRequest) {
         const db = client.db('flashcard-frenzy');
         const roomsCollection = db.collection('game-rooms');
         await roomsCollection.insertOne(newRoom);
-      } catch (mongoError) {
-        console.warn('MongoDB insert failed, using local storage');
+      } catch {
         rooms.set(roomId, newRoom);
       }
     }
@@ -73,8 +71,7 @@ export async function POST(request: NextRequest) {
       adminId: user.id
     });
 
-  } catch (error) {
-    console.error('Create manual room error:', error);
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

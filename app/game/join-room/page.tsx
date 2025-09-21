@@ -31,7 +31,7 @@ export default function JoinRoomPage() {
       } else {
         router.push(`/game/lobby/${roomId.trim()}`);
       }
-    } catch (err) {
+    } catch {
       setError('Failed to join room');
     } finally {
       setLoading(false);
