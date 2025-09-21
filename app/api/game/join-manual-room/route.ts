@@ -3,13 +3,12 @@ import { GameRoom, Player } from '@/types/game';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
-let clientPromise: any;
+let clientPromise: Promise<any> | undefined;
 let useLocalDB = false;
 
 try {
   clientPromise = import('@/lib/mongodb').then(m => m.default);
-} catch (error) {
-  console.warn('MongoDB not available, using local storage');
+} catch {
   useLocalDB = true;
 }
 
@@ -33,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     let room: GameRoom | null = null;
 
-    if (useLocalDB) {
+    if (useLocalDB || !clientPromise) {
       room = rooms.get(roomId) || null;
     } else {
       try {
@@ -41,8 +40,7 @@ export async function POST(request: NextRequest) {
         const db = client.db('flashcard-frenzy');
         const roomsCollection = db.collection('game-rooms');
         room = await roomsCollection.findOne({ roomId });
-      } catch (mongoError) {
-        console.warn('MongoDB error, falling back to local storage:', mongoError);
+      } catch {
         useLocalDB = true;
         room = rooms.get(roomId) || null;
       }
@@ -73,7 +71,7 @@ export async function POST(request: NextRequest) {
     room.players.push(player);
     room.scores[user.id] = 0;
 
-    if (useLocalDB) {
+    if (useLocalDB || !clientPromise) {
       rooms.set(roomId, room);
     } else {
       try {
@@ -87,8 +85,7 @@ export async function POST(request: NextRequest) {
             $set: { [`scores.${user.id}`]: 0 }
           }
         );
-      } catch (mongoError) {
-        console.warn('MongoDB update failed, using local storage');
+      } catch {
         rooms.set(roomId, room);
       }
     }
@@ -98,8 +95,7 @@ export async function POST(request: NextRequest) {
       room: room
     });
 
-  } catch (error) {
-    console.error('Join manual room error:', error);
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

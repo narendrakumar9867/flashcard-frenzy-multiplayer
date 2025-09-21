@@ -2,13 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GameRoom } from '@/types/game';
 import { Collection } from 'mongodb';
 
-let clientPromise: any;
+let clientPromise: Promise<any> | undefined;
 let useLocalDB = false;
 
 try {
   clientPromise = import('@/lib/mongodb').then(m => m.default);
-} catch (error) {
-  console.warn('MongoDB not available, using local storage');
+} catch {
   useLocalDB = true;
 }
 
@@ -31,8 +30,7 @@ export async function GET(
         const db = client.db('flashcard-frenzy');
         const roomsCollection = db.collection('game-rooms') as Collection<GameRoom>;
         room = await roomsCollection.findOne({ roomId });
-      } catch (mongoError) {
-        console.warn('MongoDB error, falling back to local storage:', mongoError);
+      } catch {
         useLocalDB = true;
         room = rooms.get(roomId) || null;
       }
@@ -43,8 +41,7 @@ export async function GET(
     }
 
     return NextResponse.json(room);
-  } catch (error) {
-    console.error('Room status error:', error);
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

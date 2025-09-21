@@ -2,6 +2,7 @@
 import { useState } from "react"
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
+import Image from "next/image";
 
 interface FormData {
     email: string;
@@ -92,7 +93,7 @@ export default function SignupPage() {
                     setSuccess("Account created! Please check your email to confirm your account before signing in.");
                 }
             }
-        } catch (err) {
+        } catch {
             setError("An unexpected error occurred");
         } finally {
             setLoading(false);
@@ -115,7 +116,7 @@ export default function SignupPage() {
             if (error) {
                 setError(error.message);
             }
-        } catch (err) {
+        } catch {
             setError("An unexpected error occurred");
         } finally {
             setLoading(false);
@@ -206,7 +207,7 @@ export default function SignupPage() {
                     disabled={loading}
                     className="w-full py-2 flex items-center justify-center rounded-lg border hover:bg-gray-50 disabled:opacity-50 transition-colors gap-2"
                     >
-                    <img
+                    <Image
                         src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
                         alt="Google"
                         className="w-5 h-5"

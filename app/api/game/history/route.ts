@@ -4,13 +4,12 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { Collection } from 'mongodb';
 
-let clientPromise: any;
+let clientPromise: Promise<any> | undefined;
 let useLocalDB = false;
 
 try {
   clientPromise = import('@/lib/mongodb').then(m => m.default);
-} catch (error) {
-  console.warn('MongoDB not available, using local storage');
+} catch {
   useLocalDB = true;
 }
 
@@ -28,7 +27,7 @@ export async function GET() {
 
     let userHistory: GameHistory[] = [];
 
-    if (useLocalDB) {
+    if (useLocalDB || !clientPromise) {
       userHistory = history
         .filter(h => h.playerId === user.id)
         .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime())
@@ -44,8 +43,7 @@ export async function GET() {
           .sort({ completedAt: -1 })
           .limit(20)
           .toArray();
-      } catch (mongoError) {
-        console.warn('MongoDB error, falling back to local storage:', mongoError);
+      } catch {
         useLocalDB = true;
         userHistory = history
           .filter(h => h.playerId === user.id)
@@ -55,8 +53,7 @@ export async function GET() {
     }
 
     return NextResponse.json(userHistory);
-  } catch (error) {
-    console.error('Game history error:', error);
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
