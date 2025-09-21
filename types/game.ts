@@ -1,4 +1,3 @@
-// types/game.ts
 export interface Question {
   id: string;
   question: string;
@@ -20,9 +19,9 @@ export interface GameRoom {
   questions: Question[];
   scores: { [playerId: string]: number };
   status: 'waiting' | 'playing' | 'finished';
-  gameType: 'auto' | 'manual'; // New field
-  adminId: string; // New field - room creator
-  maxPlayers: number; // New field
+  gameType: 'auto' | 'manual'; 
+  adminId: string; 
+  maxPlayers: number; 
   createdAt: Date;
   answers: { [playerId: string]: { [questionIndex: number]: { answer: string; correct: boolean; timestamp: Date } } };
 }

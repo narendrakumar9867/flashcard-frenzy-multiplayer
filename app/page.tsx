@@ -47,13 +47,7 @@ export default function Home() {
         <div className="flex items-center space-x-4">
           {user ? (
             <>
-              <span>Welcome, {user.user_metadata?.username || user.email}</span>
-              <button
-                onClick={() => router.push('/dashboard')}
-                className="bg-black text-white border px-4 py-2 rounded hover:bg-white hover:text-black"
-              >
-                Dashboard
-              </button>
+              <span>Welcome, {user.user_metadata?.username || user.user_metadata?.name}</span>
               <button
                 onClick={handleLogout}
                 className="bg-white text-black border px-4 py-2 rounded hover:bg-black hover:text-white"

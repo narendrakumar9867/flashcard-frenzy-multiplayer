@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { GameRoom } from '@/types/game';
+import { GameRoom, Player } from '@/types/game';
 
 interface GameLobbyPageProps {
   params: Promise<{ roomId: string }>;
@@ -11,7 +11,7 @@ export default function GameLobbyPage({ params }: GameLobbyPageProps) {
   const [room, setRoom] = useState<GameRoom | null>(null);
   const [loading, setLoading] = useState(true);
   const [roomId, setRoomId] = useState<string>('');
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<Player | null>(null);
   const [gameStarting, setGameStarting] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const router = useRouter();
@@ -73,7 +73,15 @@ export default function GameLobbyPage({ params }: GameLobbyPageProps) {
         const { createClientComponentClient } = await import('@supabase/auth-helpers-nextjs');
         const supabase = createClientComponentClient();
         const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
+        if (user) {
+          setUser({
+            id: user.id,
+            email: user.email ?? '',
+            username: user.user_metadata?.username ?? user.email ?? ''
+          });
+        } else {
+          setUser(null);
+        }
       } catch (error) {
         console.error('Error getting user:', error);
       }

@@ -1,9 +1,10 @@
+import type { Collection, MongoClient } from 'mongodb';
 import { NextRequest, NextResponse } from 'next/server';
 import { GameRoom, Player } from '@/types/game';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
-let clientPromise: Promise<any> | undefined;
+let clientPromise: Promise<MongoClient> | undefined;
 let useLocalDB = false;
 
 try {
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
       try {
         const client = await clientPromise;
         const db = client.db('flashcard-frenzy');
-        const roomsCollection = db.collection('game-rooms');
+        const roomsCollection = db.collection('game-rooms') as Collection<GameRoom>;
         await roomsCollection.insertOne(newRoom);
       } catch {
         rooms.set(roomId, newRoom);

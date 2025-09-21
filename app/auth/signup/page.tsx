@@ -210,6 +210,8 @@ export default function SignupPage() {
                     <Image
                         src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
                         alt="Google"
+                        width={10}
+                        height={10}
                         className="w-5 h-5"
                     />
                     Sign up with Google
