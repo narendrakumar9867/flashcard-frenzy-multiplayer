@@ -157,7 +157,7 @@ export default function DashboardPage() {
                           View Questions ({game.questions.length})
                         </summary>
                         <div className="mt-2 space-y-2">
-                          {game.questions.slice(0, 3).map((q, qIndex) => (
+                          {game.questions.slice(0, 10).map((q, qIndex) => (
                             <div key={qIndex} className={`text-sm p-2 rounded ${
                               q.isCorrect ? 'bg-green-50' : 'bg-red-50'
                             }`}>
@@ -172,11 +172,6 @@ export default function DashboardPage() {
                               )}
                             </div>
                           ))}
-                          {game.questions.length > 3 && (
-                            <div className="text-sm text-gray-500">
-                              ... and {game.questions.length - 3} more questions
-                            </div>
-                          )}
                         </div>
                       </details>
                     </div>

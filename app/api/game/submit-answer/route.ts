@@ -19,7 +19,7 @@ const history: GameHistory[] = [];
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
     const supabase = createServerComponentClient({ cookies: () => cookieStore });
     const { data: { user }, error } = await supabase.auth.getUser();
 
