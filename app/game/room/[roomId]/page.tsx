@@ -18,6 +18,7 @@ export default function GameRoomPage({ params }: GameRoomPageProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(10);
   const [isAnswered, setIsAnswered] = useState(false);
+  const [gameStarting, setGameStarting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -31,11 +32,11 @@ export default function GameRoomPage({ params }: GameRoomPageProps) {
   }, [params]);
 
   useEffect(() => {
-    if (roomId) {
+    if (roomId && !gameStarting) {
       const interval = setInterval(() => loadRoom(roomId), 3000);
       return () => clearInterval(interval);
     }
-  }, [roomId]);
+  }, [roomId, gameStarting]);
 
   useEffect(() => {
     if (!loading && room && room.status === 'playing' && !isAnswered && !showResult && timeLeft > 0) {
@@ -50,7 +51,7 @@ export default function GameRoomPage({ params }: GameRoomPageProps) {
   }, [timeLeft, loading, room, isAnswered, showResult]);
 
   useEffect(() => {
-    if (room && !isAnswered && !showResult) {
+    if (room && !isAnswered && !showResult && currentQuestionIndex > 0) {
       setTimeLeft(10);
     }
   }, [currentQuestionIndex, room, isAnswered, showResult]);
@@ -114,6 +115,7 @@ export default function GameRoomPage({ params }: GameRoomPageProps) {
         setTimeout(() => {
           setShowResult(null);
           setIsAnswered(false);
+          setGameStarting(false);
           
           if (result.gameEnded) {
             setGameEnded(true);
@@ -121,6 +123,7 @@ export default function GameRoomPage({ params }: GameRoomPageProps) {
             setCurrentQuestionIndex(10); 
           } else {
             setCurrentQuestionIndex(result.nextQuestionIndex);
+            setGameStarting(true);
             setTimeLeft(10); 
           }
         }, 3000);
@@ -166,18 +169,26 @@ export default function GameRoomPage({ params }: GameRoomPageProps) {
       }))
       .sort((a, b) => b.score - a.score);
 
+    const highestScore = sortedPlayers[0]?.score || 0;
+    const playersWithHighestScore = sortedPlayers.filter(p => p.score === highestScore);
+    const isDraw = playersWithHighestScore.length > 1;
+
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-8">
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
-          <h1 className="text-3xl font-bold mb-6">🎉 Game Over!</h1>
+          <h1 className="text-3xl font-bold mb-6">
+            {isDraw ? "It's a Draw!" : "Game Over!"}
+          </h1>
           
           <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-4">Final Results:</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {isDraw ? "Final Results: Draw!" : "Final Results! Winner: " + sortedPlayers[0].username}
+            </h2>
             {sortedPlayers.map((player, index) => (
-              <div key={player.id} className={`p-3 rounded mb-2 ${index === 0 ? 'bg-green-100' : 'bg-gray-100'}`}>
+              <div key={player.id} className={`p-3 rounded mb-2 ${isDraw && player.score === highestScore ? 'bg-yellow-100' : index === 0 ? 'bg-green-100' : 'bg-gray-100'}`}>
                 <div className="flex justify-between items-center">
                   <span className="font-medium">
-                    {index === 0 ? '1. ' : `${index + 1}. `}
+                    {isDraw && player.score === highestScore ? "Draw: " : index === 0 ? "1. " : `${index + 1}. `}
                     {player.username}
                   </span>
                   <span className="font-bold">{player.score}/10</span>
